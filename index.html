@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Dog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .heart-container {
+            position: relative;
+            width: 90vmin;
+            height: 90vmin;
+        }
+        .note {
+            position: absolute;
+            padding: 12px 20px; /* 减少上下内边距 */
+            border-radius: 15px; /* 稍微减小圆角 */
+            color: #333;
+            font-size: 15px; /* 稍微减小字体 */
+            font-weight: 500;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            animation: floatIn 0.6s ease-out;
+            width: 220px; /* 固定宽度 */
+            min-height: 60px; /* 降低最小高度 */
+            max-height: 70px; /* 限制最大高度 */
+            word-wrap: break-word;
+            text-align: center;
+            line-height: 1.3; /* 减小行高 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden; /* 防止文本溢出 */
+        }
+        @keyframes floatIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .header {
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        @media (max-width: 768px) {
+            .note {
+                width: 180px;
+                min-height: 50px;
+                max-height: 60px;
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+            .heart-container {
+                width: 95vmin;
+                height: 95vmin;
+            }
+            .header {
+                top: 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">💕</div>
+    <div class="heart-container" id="heartContainer"></div>
+
+    <script>
+        const tips = [
+            "✨ 注意用眼休息~", "🍚 有没有好好吃饭~", "🌟 每天都要元气满满~",
+            "🍎 记得吃水果~", "😊 今天过得开心嘛~", "💝 对自己好一点~",
+            "🌞 保持好心情~", "🤗 期待下一次见面~", "🚀 加油,奥利给~",
+            "🎯 你是独一无二的存在~", "💼 工作辛苦嘛~", "🌙 早点休息~",
+            "🧥 天冷了，多穿衣服~", "📞 最近过得好嘛~", "⏰ 别熬夜哦~",
+            "💖 好好爱自己~", "🌈 愿所有烦恼都消失~", "💪 相信自己，你可以的~",
+            "⭐ 你如星光般闪耀~", "😄 天天开心哟~", "💧 记得多喝水~",
+            "🏆 今天的你很优秀~", "🎉 心想事都会成~", "📈 又在进步了呢~",
+            "😊 给自己一个微笑~"
+        ];
+
+        const colors = [
+            "#FFB6C1", "#FFD700", "#98FB98", "#87CEEB", "#DDA0DD",
+            "#F0E68C", "#E0FFFF", "#FFA07A", "#B0E0E6", "#FFDEAD",
+            "#C9FFE5", "#FFDAB9", "#BBFFFF", "#E6E6FA", "#FFEFD5"
+        ];
+
+        // 心形路径坐标生成
+        function getHeartPoints(count) {
+            const points = [];
+            for (let i = 0; i < count; i++) {
+                const t = i / count * 2 * Math.PI;
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+                points.push({x, y});
+            }
+            return points;
+        }
+
+        function getHeartPosition(index, total) {
+            const heartPoints = getHeartPoints(total);
+            const point = heartPoints[index];
+            
+            const container = document.getElementById('heartContainer');
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            
+            const scale = Math.min(containerWidth, containerHeight) / 35;
+            const x = containerWidth/2 + point.x * scale;
+            const y = containerHeight/2 - point.y * scale;
+            
+            return {x, y};
+        }
+
+        let currentHeartIndex = 0;
+        const maxHeartPoints = 36;
+
+        function createNote() {
+            const note = document.createElement("div");
+            note.className = 'note';
+            note.textContent = tips[Math.floor(Math.random() * tips.length)];
+            note.style.background = colors[Math.floor(Math.random() * colors.length)]; // 随机颜色
+            
+            const position = getHeartPosition(currentHeartIndex, maxHeartPoints);
+            note.style.left = `${position.x - 110}px`; // 减去一半宽度居中
+            note.style.top = `${position.y - 30}px`;   // 减去一半高度居中
+            
+            document.getElementById('heartContainer').appendChild(note);
+            
+            currentHeartIndex = (currentHeartIndex + 1) % maxHeartPoints;
+
+            setTimeout(() => {
+                note.style.transition = 'all 0.8s ease-in-out';
+                note.style.opacity = '0';
+                note.style.transform = 'translateY(-20px) scale(0.8)';
+                setTimeout(() => {
+                    if (note.parentNode) {
+                        note.parentNode.removeChild(note);
+                    }
+                }, 800);
+            }, 6000);
+        }
+
+        setInterval(createNote, 300);
+        
+        for (let i = 0; i < 15; i++) {
+            setTimeout(() => createNote(), i * 200);
+        }
+
+        // 点击时在点击位置创建提示
+        document.body.addEventListener('click', function(e) {
+            if (e.target === document.body) {
+                const note = document.createElement("div");
+                note.className = 'note';
+                note.textContent = tips[Math.floor(Math.random() * tips.length)];
+                note.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 在点击位置创建
+                note.style.left = `${e.clientX - 110}px`;
+                note.style.top = `${e.clientY - 30}px`;
+                
+                document.body.appendChild(note);
+
+                setTimeout(() => {
+                    note.style.transition = 'all 0.8s ease-in-out';
+                    note.style.opacity = '0';
+                    note.style.transform = 'translateY(-20px) scale(0.8)';
+                    setTimeout(() => {
+                        if (note.parentNode) {
+                            document.body.removeChild(note);
+                        }
+                    }, 800);
+                }, 6000);
+            }
+        });
+
+        // 窗口大小变化时重新计算心形路径
+        window.addEventListener('resize', function() {
+            const notes = document.querySelectorAll('.note');
+            notes.forEach((note, index) => {
+                if (note.parentNode === document.getElementById('heartContainer')) {
+                    const position = getHeartPosition(index % maxHeartPoints, maxHeartPoints);
+                    note.style.left = `${position.x - 110}px`;
+                    note.style.top = `${position.y - 30}px`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
